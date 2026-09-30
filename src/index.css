@@ -1,0 +1,231 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ══════════════════════════════════════════════════
+   IMPECCABLE & EMIL KOWALSKI CRAFT DESIGN TOKENS
+   ══════════════════════════════════════════════════ */
+
+:root {
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 160ms;
+  --duration-normal: 240ms;
+  --duration-gentle: 380ms;
+  
+  --color-warm-bone: #f7f4ee;
+  --color-warm-card: #fdfcfa;
+  --color-sand: #ebe5db;
+  --color-terracotta: #c44d2d;
+  --color-terracotta-dark: #99371d;
+  --color-maize: #d99b26;
+  --color-espresso: #201915;
+}
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: #f7f4ee;
+    color: #1a1715;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f7f4ee;
+    color: #1a1715;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  ::selection {
+    background-color: #201915;
+    color: #f7f4ee;
+  }
+
+  h1, h2, h3, h4, .font-editorial {
+    font-family: 'Playfair Display', 'Cinzel', Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+
+  .font-mono-tech {
+    font-family: 'Space Mono', 'JetBrains Mono', monospace;
+  }
+
+  /* Refined, smooth scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f7f4ee;
+    border-left: 1px solid rgba(26, 23, 21, 0.08);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #b5ada2;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #7a7267;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   INTERACTIVE BUTTONS & CONTROLS (EMIL KOWALSKI STYLE)
+   ══════════════════════════════════════════════════ */
+
+@layer components {
+  /* Tactile primary button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 rounded-xl font-medium text-sm
+           bg-[#201915] text-[#f7f4ee] shadow-sm hover:bg-[#342a24] active:scale-[0.98]
+           transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
+           min-h-[44px];
+  }
+
+  /* Tactile warm accent button (Terracotta) */
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 rounded-xl font-medium text-sm
+           bg-[#c44d2d] text-white shadow-sm hover:bg-[#aa3e22] active:scale-[0.98]
+           transition-all duration-200 cursor-pointer min-h-[44px];
+  }
+
+  /* Tactile secondary/outline button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl font-medium text-sm
+           bg-[#ebe5db]/70 border border-stone-300 text-[#201915] hover:bg-[#ebe5db] active:scale-[0.98]
+           transition-all duration-200 cursor-pointer min-h-[44px];
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium text-sm
+           text-stone-700 hover:text-stone-900 hover:bg-stone-200/50 active:scale-[0.98]
+           transition-all duration-150 cursor-pointer min-h-[44px];
+  }
+
+  /* Editorial & Brutalist Buttons (Hero & Reservation) */
+  .btn-brutalist {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-mono text-xs uppercase tracking-widest
+           bg-stone-900 text-[#f7f4ee] hover:bg-[#382b24] active:scale-[0.98]
+           transition-all duration-200 cursor-pointer shadow-sm min-h-[48px];
+  }
+
+  .btn-brutalist-outline {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-mono text-xs uppercase tracking-widest
+           bg-transparent border-2 border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-[#f7f4ee] active:scale-[0.98]
+           transition-all duration-200 cursor-pointer min-h-[48px];
+  }
+
+  /* Refined form inputs with 16px mobile font-size to prevent iOS Safari auto-zoom */
+  .input-refined {
+    @apply w-full bg-[#fdfcfa] border border-stone-300 rounded-xl px-4 py-3 sm:py-2.5
+           text-base sm:text-sm text-stone-900 placeholder:text-stone-400
+           focus:outline-none focus:ring-2 focus:ring-[#c44d2d]/30 focus:border-[#c44d2d]
+           transition-all duration-150 min-h-[44px];
+  }
+
+  .input-brutalist {
+    @apply w-full bg-[#fdfcfa] border border-stone-300 rounded-xl px-4 py-3
+           text-base sm:text-sm text-stone-900 placeholder:text-stone-400
+           focus:outline-none focus:ring-2 focus:ring-[#c44d2d]/30 focus:border-[#c44d2d]
+           transition-all duration-150 min-h-[46px];
+  }
+
+  .label-refined {
+    @apply block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5;
+  }
+
+  .label-technical {
+    @apply block font-mono text-[11px] sm:text-xs tracking-wider uppercase text-stone-700 font-semibold mb-2;
+  }
+
+  /* Dish card surface */
+  .card-dish {
+    @apply rounded-2xl bg-[#fdfcfa] border border-stone-200/80 shadow-[0_2px_8px_rgba(32,25,21,0.04)]
+           hover:shadow-[0_8px_24px_rgba(32,25,21,0.08)] hover:border-stone-300
+           transition-all duration-200 flex flex-col overflow-hidden;
+  }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* ══════════════════════════════════════════════════
+   MICRO-ANIMATIONS & TRANSITIONS (BUTTERY FLUID 60FPS)
+   ══════════════════════════════════════════════════ */
+
+.ease-spring {
+  transition-timing-function: var(--ease-spring);
+}
+
+.ease-fluid {
+  transition-timing-function: var(--ease-fluid);
+}
+
+@keyframes springFadeIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.975);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-spring-in {
+  animation: springFadeIn 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+@keyframes drawerSlideIn {
+  from {
+    transform: translate3d(100%, 0, 0);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+.animate-drawer-in {
+  animation: drawerSlideIn 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+@keyframes smoothFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+.animate-fadeIn {
+  animation: smoothFadeIn 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, backdrop-filter;
+}
+
+/* Touch optimization for mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+

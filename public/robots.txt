@@ -1,0 +1,9 @@
+# Robots.txt — La Querendona Huelva
+User-agent: *
+Allow: /
+Allow: /carta
+Allow: /menu
+Disallow: /admin
+Disallow: /admin/panel
+
+Sitemap: https://laquerendonahuelva.es/sitemap.xml
