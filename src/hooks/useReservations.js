@@ -7,6 +7,7 @@ import {
   isSupabaseConfigured,
 } from "../lib/supabase";
 import { sanitizeReservation } from "../lib/security";
+import { sendReservationPushNotification } from "../lib/onesignal";
 
 const LOCAL_RESERVATIONS_KEY = "laquerendona_reservations";
 
@@ -170,6 +171,9 @@ export function useReservations() {
         console.warn("Fallo al guardar en Supabase, conservando copia local:", err);
       }
     }
+
+    // Disparar Web Push a través de OneSignal (llega con la web cerrada al admin)
+    sendReservationPushNotification(clean).catch(() => {});
 
     return clientRes;
   }, []);

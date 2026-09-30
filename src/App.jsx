@@ -9,6 +9,7 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import MobileBottomNav from "./components/layout/MobileBottomNav";
 import GrainOverlay from "./components/ui/GrainOverlay";
+import { initOneSignal } from "./lib/onesignal";
 
 import HomePage from "./pages/HomePage";
 import PublicMenuPage from "./pages/PublicMenuPage";
@@ -66,6 +67,11 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    // Inicializar OneSignal y registrar Service Worker para Web Push
+    initOneSignal();
+  }, []);
+
   return (
     <BrowserRouter>
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />

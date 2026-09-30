@@ -8,8 +8,9 @@ import {
   checkSupabaseOAuthRedirect,
 } from "../../lib/googleAuth";
 import GoogleVerifyModal from "./GoogleVerifyModal";
-import { FiArrowRight, FiCheck, FiShield, FiAlertCircle } from "react-icons/fi";
+import { FiArrowRight, FiCheck, FiShield, FiAlertCircle, FiBell } from "react-icons/fi";
 import toast from "react-hot-toast";
+import { requestPushPermission, isPushPermissionGranted } from "../../lib/onesignal";
 
 // Icono vectorial oficial de Google
 function GoogleIcon({ className = "w-4 h-4" }) {
@@ -49,6 +50,7 @@ export default function ReservationForm() {
 
   // Estado de usuario verificado con Google
   const [googleUser, setGoogleUser] = useState(() => getStoredGoogleVerification());
+  const [pushSubscribed, setPushSubscribed] = useState(() => isPushPermissionGranted());
 
   const [form, setForm] = useState({
     name: googleUser?.name || "",
@@ -250,9 +252,41 @@ export default function ReservationForm() {
                   </div>
                 </div>
 
-                <p className="font-mono text-xs text-zinc-900/70 mb-8 leading-relaxed">
+                <p className="font-mono text-xs text-zinc-900/70 mb-6 leading-relaxed">
                   Te esperamos en C. Bonares, 5 (Huelva). Si necesitas modificar o cancelar la reserva, llámanos al 643 93 16 08 indicando tu código de reserva [{ticketData.id}].
                 </p>
+
+                {/* Notificaciones Web Push de confirmación de mesa */}
+                {!pushSubscribed && (
+                  <div className="mb-6 p-4 bg-white/80 border border-stone-300 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left shadow-xs">
+                    <div className="flex items-start gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-[#c44d2d]/10 text-[#c44d2d] flex items-center justify-center shrink-0 mt-0.5">
+                        <FiBell className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-stone-900 font-mono uppercase tracking-wider">
+                          Avisos de sala en tu móvil
+                        </p>
+                        <p className="text-[11px] text-stone-600 font-mono mt-0.5">
+                          Recibe un aviso al instante cuando confirmemos tu mesa, incluso con la web cerrada.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const ok = await requestPushPermission();
+                        if (ok) {
+                          setPushSubscribed(true);
+                          toast.success("¡Alertas push activadas para tu reserva!");
+                        }
+                      }}
+                      className="shrink-0 py-1.5 px-3 rounded-lg bg-[#c44d2d] hover:bg-[#a83f23] text-white font-mono text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer text-center"
+                    >
+                      Activar Avisos
+                    </button>
+                  </div>
+                )}
 
                 <button
                   onClick={() => {

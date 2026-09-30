@@ -13,7 +13,19 @@ import {
   FiChevronRight,
   FiVolume2,
   FiVolumeX,
+  FiSmartphone,
+  FiSend,
+  FiRadio,
 } from "react-icons/fi";
+import toast from "react-hot-toast";
+import {
+  isPushPermissionGranted,
+  requestPushPermission,
+  tagUserAsAdmin,
+  sendReservationPushNotification,
+  sendTestPushNotification,
+  isOneSignalConfigured,
+} from "../../lib/onesignal";
 
 /**
  * SISTEMA DE NOTIFICACIONES DE RESERVA EN TIEMPO REAL PARA ADMINISTRADORES
@@ -79,10 +91,21 @@ export default function AdminReservationNotifier({ onSelectReservation, onConfir
   const [desktopNotifAllowed, setDesktopNotifAllowed] = useState(() => {
     return typeof Notification !== "undefined" && Notification.permission === "granted";
   });
+  const [pushEnabled, setPushEnabled] = useState(() => isPushPermissionGranted());
+  const [pushLoading, setPushLoading] = useState(false);
+  const [pushTesting, setPushTesting] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [recentAlerts, setRecentAlerts] = useState([]);
 
   const autoDismissTimer = useRef(null);
+
+  // Etiquetar automáticamente como 'admin' en OneSignal al entrar al panel
+  useEffect(() => {
+    if (isAuthorized) {
+      tagUserAsAdmin(true);
+      setPushEnabled(isPushPermissionGranted());
+    }
+  }, [isAuthorized]);
 
   const toggleSound = () => {
     setSoundEnabled((prev) => {
@@ -91,6 +114,32 @@ export default function AdminReservationNotifier({ onSelectReservation, onConfir
       if (next) playConciergeChime();
       return next;
     });
+  };
+
+  const handleActivatePush = async () => {
+    setPushLoading(true);
+    const granted = await requestPushPermission();
+    if (granted) {
+      await tagUserAsAdmin(true);
+      setPushEnabled(true);
+      setDesktopNotifAllowed(true);
+      toast.success("¡Web Push OneSignal activado! Recibirás alertas con la web cerrada.");
+    } else {
+      toast.error("Permiso de notificaciones push denegado o bloqueado.");
+    }
+    setPushLoading(false);
+  };
+
+  const handleTestPushClosed = async () => {
+    setPushTesting(true);
+    toast("Minimiza o sal de la web ahora: la alerta push llegará en 3 segundos...", {
+      icon: "📲",
+      duration: 4500,
+    });
+    setTimeout(async () => {
+      await sendTestPushNotification();
+      setPushTesting(false);
+    }, 3000);
   };
 
   const requestDesktopPermission = async () => {
@@ -118,7 +167,10 @@ export default function AdminReservationNotifier({ onSelectReservation, onConfir
         playConciergeChime();
       }
 
-      // Notificación de escritorio si está en segundo plano
+      // Notificación Web Push a través de OneSignal / Service Worker (funciona con la web cerrada o en segundo plano)
+      sendReservationPushNotification(reservation).catch(() => {});
+
+      // Notificación de escritorio local si la pestaña está oculta
       if (desktopNotifAllowed && document.visibilityState !== "visible") {
         try {
           new Notification(`¡Nueva Reserva: ${reservation.name}!`, {
@@ -371,13 +423,57 @@ export default function AdminReservationNotifier({ onSelectReservation, onConfir
               </button>
             </div>
 
-            {/* Ajustes Rápidos */}
-            <div className="space-y-2 mb-4 p-3 rounded-xl bg-[#f7f4ee] border border-stone-200/80 text-xs">
-              <div className="flex items-center justify-between">
+            {/* Ajustes Rápidos & OneSignal Web Push */}
+            <div className="space-y-3 mb-4 p-3.5 rounded-2xl bg-[#f7f4ee] border border-stone-200 text-xs shadow-sm">
+              {/* Sección OneSignal Web Push (Web Cerrada) */}
+              <div className="p-2.5 rounded-xl bg-white border border-stone-200/80 shadow-xs">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <FiSmartphone className="w-4 h-4 text-[#c44d2d]" />
+                    <span className="font-bold text-stone-900 text-xs">OneSignal Web Push</span>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-full font-mono text-[9px] font-bold uppercase tracking-wider ${
+                      pushEnabled
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        : "bg-amber-100 text-amber-800 border border-amber-300"
+                    }`}
+                  >
+                    {pushEnabled ? "Activo (Web Cerrada)" : "No configurado"}
+                  </span>
+                </div>
+                <p className="text-[11px] text-stone-500 leading-tight mb-2">
+                  Recibe avisos de reservas en tu móvil y ordenador aunque tengas el navegador cerrado o en segundo plano.
+                </p>
+                <div className="flex items-center gap-2">
+                  {!pushEnabled ? (
+                    <button
+                      onClick={handleActivatePush}
+                      disabled={pushLoading}
+                      className="flex-1 py-1 px-2.5 rounded-lg bg-[#c44d2d] hover:bg-[#a83f23] text-white font-mono text-[10px] font-bold tracking-wide uppercase transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                    >
+                      {pushLoading ? "Solicitando..." : "Activar Web Push"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleTestPushClosed}
+                      disabled={pushTesting}
+                      className="flex-1 py-1 px-2 rounded-lg bg-stone-900 hover:bg-[#c44d2d] text-white font-mono text-[10px] tracking-wider uppercase transition-colors cursor-pointer inline-flex items-center justify-center gap-1 shadow-xs disabled:opacity-50"
+                      title="Pulsa, minimiza la ventana y comprueba que llega la notificación del sistema operativo"
+                    >
+                      <FiSend className="w-3 h-3" />
+                      <span>{pushTesting ? "Enviando en 3s..." : "Probar con Web Cerrada"}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Ajuste de Sonido */}
+              <div className="flex items-center justify-between px-1">
                 <span className="font-medium text-stone-700">Timbre acústico de sala:</span>
                 <button
                   onClick={toggleSound}
-                  className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
+                  className={`px-2 py-0.5 rounded-md font-mono text-[10px] font-bold ${
                     soundEnabled ? "bg-emerald-100 text-emerald-800" : "bg-stone-200 text-stone-600"
                   }`}
                 >
@@ -385,8 +481,9 @@ export default function AdminReservationNotifier({ onSelectReservation, onConfir
                 </button>
               </div>
 
-              <div className="flex items-center justify-between pt-1 border-t border-stone-200/60">
-                <span className="font-medium text-stone-700">Notificaciones de Escritorio:</span>
+              {/* Permiso de escritorio */}
+              <div className="flex items-center justify-between px-1 pt-1 border-t border-stone-200/60">
+                <span className="font-medium text-stone-700">Alertas de Escritorio:</span>
                 {desktopNotifAllowed ? (
                   <span className="text-[10px] font-mono text-emerald-700 font-bold">PERMITIDAS</span>
                 ) : (
@@ -394,7 +491,7 @@ export default function AdminReservationNotifier({ onSelectReservation, onConfir
                     onClick={requestDesktopPermission}
                     className="text-[10px] font-mono text-[#c44d2d] underline font-bold"
                   >
-                    Activar
+                    Permitir
                   </button>
                 )}
               </div>
